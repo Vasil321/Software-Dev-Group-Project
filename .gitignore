@@ -1,0 +1,6 @@
+__pycache__
+healthcheck/__pycache__
+healthcheck/migrations/__pycache__
+sky/__pycache__
+djangoenv/
+djangoenv/*

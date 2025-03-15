@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h2>Welcome, {{ user.username }}</h2>
+
+{% if user.userprofile.role == 'Admin' %}
+    {% comment %} <a href="{% url 'manage_users' %}" class="btn btn-danger">Manage Users</a>
+    <a href="{% url 'manage_questions' %}" class="btn btn-primary">Manage Questions</a> {% endcomment %}
+{% elif user.userprofile.role == 'Senior Manager' %}
+    <div> Dashboard for Senior manager </div>
+{% elif user.userprofile.role == 'Department Leader' %}
+    <div> Dashboard for Department leader </div>
+{% elif user.userprofile.role == 'Team Leader' %}
+    <hr>
+    <h3>Your Teams</h3>
+    <table class="table table-striped">
+        <tr>
+            <th>Team Name</th>
+            <th>Engineers</th>
+        </tr>
+
+        {% for team in teams %}
+            <tr>
+                <td>{{ team.name }}</td>
+                <td>
+                    {% for engineer in team.engineers.all %}
+                        {{ engineer.first_name }} {{ engineer.last_name }} (Username: {{ engineer.username }}) <br/>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'manage_teams' %}" class="btn btn-info">Manage Teams</a>
+    <br/><br/>
+    <hr>
+    <h3>Your Current Sessions</h3>
+    <table class="table table-striped">
+        <tr>
+            <th>Session Name</th>
+            <th>Team Name</th>
+            <th>Questions</th>
+        </tr>
+
+        {% comment %} {% for session in sessions %}
+            <tr>
+                <td>
+                    {{ session }}
+                    <button class="btn btn-primary btn-sm" data-target="#collapseAnswer{{forloop.counter}}" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapseAnswer{{forloop.counter}}">
+                        View answers
+                    </button>
+                    <div class="collapse" id="collapseAnswer{{ forloop.counter }}">
+                        <div class="card card-body">
+                            {% for answer in answers %}
+                                {% if answer.session == session %}
+                                    {{ answer.engineer.username }} - {{ answer.question.text }} - {{ answer.response }} <br/>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </td>
+                <td>{{ session.team }} </td>
+                <td>
+                    {% for question in session.questions.all %}
+                        {{ question.text }} <br/>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %} {% endcomment %}
+
+    </table>
+    {% comment %} <a href="{% url 'create_session' %}" class="btn btn-info">Create Session</a> {% endcomment %}
+{% elif user.userprofile.role == 'Engineer' %}
+    {% comment %} <a href="{% url 'answer_questions' %}" class="btn btn-success btn-sm">Answer Questions</a> {% endcomment %}
+{% endif %}
+
+
+
+{% endblock %}

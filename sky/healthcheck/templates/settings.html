@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<h2>Update Settings</h2>
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label">First Name</label>
+        {{ form.first_name }}
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Last Name</label>
+        {{ form.last_name }}
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        {{ form.email }}
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>
+{% endblock %}

@@ -1,0 +1,11 @@
+Django==5.1
+djangorestframework
+djangorestframework-simplejwt
+psycopg2-binary
+django-environ
+ipython
+dj-database-url
+django-debug-toolbar
+pytest-django
+flake8
+black
