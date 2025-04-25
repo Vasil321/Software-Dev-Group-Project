@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<h2>Welcome, {{ user.username }}</h2>
+<h2 align="center">Welcome, {{ user.username }}</h2>
 
 {% if user.userprofile.role == 'Admin' %}
     {% comment %} <a href="{% url 'manage_users' %}" class="btn btn-danger">Manage Users</a>
@@ -9,7 +9,29 @@
 {% elif user.userprofile.role == 'Senior Manager' %}
     <div> Dashboard for Senior manager </div>
 {% elif user.userprofile.role == 'Department Leader' %}
-    <div> Dashboard for Department leader </div>
+    <hr>
+    <h3>Your Department(s)</h3>
+    <table class="table table-striped">
+        <tr>
+            <th>Department Name</th>
+            <th>Teams</th>
+        </tr>
+
+        {% for department in departments %}
+            <tr>
+                <td>{{ department.name }}</td>
+                <td>
+
+                    {% for team in department.teams.all %}
+                        {{ team.name }} (Leader: {{team.leader.first_name}} {{team.leader.last_name}}) <br/>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'manage_departments' %}" class="btn btn-secondary">Manage Departments</a>
+    <br/><br/>
+
 {% elif user.userprofile.role == 'Team Leader' %}
     <hr>
     <h3>Your Teams</h3>
@@ -30,7 +52,7 @@
             </tr>
         {% endfor %}
     </table>
-    <a href="{% url 'manage_teams' %}" class="btn btn-info">Manage Teams</a>
+    <a href="{% url 'manage_teams' %}" class="btn btn-secondary">Manage Teams</a>
     <br/><br/>
     <hr>
     <h3>Your Current Sessions</h3>

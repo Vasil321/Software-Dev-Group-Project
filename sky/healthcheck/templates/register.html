@@ -15,6 +15,14 @@
 
         <form method="post">
             {% csrf_token %}
+
+            <div class="form-group row">
+                <label class="form-label">{{ form.role.label }}</label>
+                {{ form.role }}
+                <small class="text-danger">{{ form.role.errors }}</small>
+            </div>
+            
+            <hr/>
             
             <div class="form-group row">
                 <label class="form-label">{{ form.username.label }}</label>
@@ -41,12 +49,6 @@
             </div>
 
             <div class="form-group row">
-                <label class="form-label">{{ form.role.label }}</label>
-                {{ form.role }}
-                <small class="text-danger">{{ form.role.errors }}</small>
-            </div>
-
-            <div class="form-group row">
                 <label class="form-label">{{ form.password1.label }}</label>
                 {{ form.password1 }}
                 <small class="text-danger">{{ form.password1.errors }}</small>
@@ -57,8 +59,10 @@
                 {{ form.password2 }}
                 <small class="text-danger">{{ form.password2.errors }}</small>
             </div>
-            <br/>
-            <button type="submit" class="btn btn-primary w-100">Register</button>
+            
+            <div class="mb-3 text-center">
+                <button type="submit" class="btn btn-outline-success w-25">Register</button>
+            </div>
         </form>
     </div>
 </div>

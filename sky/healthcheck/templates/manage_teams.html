@@ -17,8 +17,9 @@
         <tr>
             <td>{{ team.name }}</td>
             <td>
-                {% for member in team.members.all %}
-                    {{ member.username }}{% if not forloop.last %}, {% endif %}
+                {% for member in team.engineers.all %}
+                    {{ member.username }}
+                    {% comment %} {% if not forloop.last %}, {% endif %} {% endcomment %}
                 {% endfor %}
             </td>
             <td>

@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import UserProfile, Team
+from .models import UserProfile, Team, Department
 from django.contrib.auth.models import User
 from .forms import UserRegistrationForm, UserSettingsForm, ChangePasswordForm
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
@@ -55,10 +55,11 @@ It displays the user's role.
 def dashboard(request):
     if request.user.userprofile.role == 'Team Leader':
         teams = Team.objects.filter(leader=request.user)
-        # sessions = QuestionSession.objects.filter(team__in=teams)
-        # answers = Answer.objects.filter(session__in=sessions)
-        # return render(request, 'dashboard.html', {'teams' : teams, 'sessions' : sessions, 'answers' : answers})
         return render(request, 'dashboard.html', {'teams' : teams})
+    
+    if request.user.userprofile.role == 'Department Leader':
+        departments = Department.objects.filter(leader=request.user)
+        return render(request, 'dashboard.html', {'departments' : departments})
 
     return render(request, 'dashboard.html')
 
@@ -167,3 +168,74 @@ def delete_team(request, team_id):
     team.delete()
     messages.success(request, f"Team {team.name} deleted successfully.")
     return redirect('manage_teams')
+
+'''
+manage_departments view is used to manage the departments.
+It renders the manage_departments.html template.
+'''
+@login_required
+def manage_departments(request):
+    if not request.user.userprofile.role == 'Department Leader':
+        messages.error(request, 'Access Denied.')
+        return redirect('dashboard')
+    
+    departments = Department.objects.filter(leader=request.user)
+
+    return render(request, 'manage_departments.html', {'departments': departments})
+
+
+'''
+create_department view is used to create a department.
+It renders the create_department.html template.
+'''
+@login_required
+def create_department(request):
+    if not request.user.userprofile.role == 'Department Leader':
+        messages.error(request, 'Access Denied.')
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        department = Department.objects.create(name=name, leader=request.user)
+        messages.success(request, f"Department {name} created successfully.")
+        return redirect('manage_departments')
+    
+    return render(request, 'create_department.html')
+
+'''
+edit_department view is used to edit a department.
+It renders the edit_department.html template.
+'''
+@login_required
+def edit_department(request, department_id):
+    if not request.user.userprofile.role == 'Department Leader':
+        messages.error(request, 'Access Denied.')
+        return redirect('dashboard')
+    
+    department = get_object_or_404(Department, id=department_id)
+    teams = Team.objects.all()
+
+    if request.method == 'POST':
+        department.name = request.POST.get('name')
+        selected_teams = request.POST.getlist('teams')
+        department.teams.set(Team.objects.filter(id__in=selected_teams))
+        department.save()
+        messages.success(request, f"Department {department.name} updated successfully.")
+        return redirect('manage_departments')
+    
+    return render(request, 'edit_department.html', {'department': department, 'teams': teams})
+
+'''
+delete_department view is used to delete a department.
+It redirects the user to the manage_departments page.
+'''
+@login_required
+def delete_department(request, department_id):
+    if not request.user.userprofile.role == 'Department Leader':
+        messages.error(request, 'Access Denied.')
+        return redirect('dashboard')
+    
+    department = get_object_or_404(Department, id=department_id)
+    department.delete()
+    messages.success(request, f"Department {department.name} deleted successfully.")
+    return redirect('manage_departments')

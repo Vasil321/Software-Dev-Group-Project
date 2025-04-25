@@ -32,3 +32,14 @@ class Team(models.Model):
 
     def _str_(self):
         return self.name
+
+'''
+Department model is used to store department details.
+'''
+class Department(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='led_departments')
+    teams = models.ManyToManyField(Team, blank=True)
+
+    def _str_(self):
+        return self.name

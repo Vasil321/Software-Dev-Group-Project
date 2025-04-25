@@ -13,7 +13,7 @@
         <label for="engineers">Assign Engineers</label>
         <select name="engineers" id="engineers" class="form-control" multiple>
             {% for engineer in engineers %}
-            <option value="{{ engineer.id }}" {% if engineer in team.members.all %}selected{% endif %}>
+            <option value="{{ engineer.id }}" {% if engineer in team.engineers.all %}selected{% endif %}>
                 {{ engineer.username }}
             </option>
             {% endfor %}
