@@ -1,0 +1,27 @@
+<h2>Health Check Voting</h2>
+
+<form method="post">
+  {% csrf_token %}
+
+  <label for="session">Select Session:</label>
+  <select name="session_id" required>
+    {% for session in sessions %}
+      <option value="{{ session.0 }}">{{ session.1 }}</option>
+    {% endfor %}
+  </select>
+
+  <hr>
+
+  {% for card in cards %}
+    <div style="margin-bottom: 20px;">
+      <strong>{{ card.1 }}</strong><br>
+      <label><input type="radio" name="card_{{ card.0 }}" value="Green" required> Green</label>
+      <label><input type="radio" name="card_{{ card.0 }}" value="Amber"> Amber</label>
+      <label><input type="radio" name="card_{{ card.0 }}" value="Red"> Red</label><br>
+      <textarea name="comment_{{ card.0 }}" placeholder="Add comment (optional)" rows="2" cols="40"></textarea>
+    </div>
+    <hr>
+  {% endfor %}
+
+  <button type="submit">Submit Vote</button>
+</form>
