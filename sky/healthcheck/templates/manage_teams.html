@@ -2,15 +2,20 @@
 {% block title %}Manage Teams{% endblock %}
 {% block content %}
 <h2>Manage Teams</h2>
-<a href="{% url 'create_team' %}" class="btn btn-success mb-3">Create New Team</a>
+<hr/>
 
-<table class="table table-striped">
+<table>
+    <colgroup>
+        <col style="width: 30%;">
+        <col style="width: 50%;">
+        <col style="width: 20%;">
+    </colgroup>
     <thead>
-        <tr>
+
+
             <th>Team Name</th>
             <th>Members</th>
-            <th>Actions</th>
-        </tr>
+            <th></th>
     </thead>
     <tbody>
         {% for team in teams %}
@@ -22,12 +27,17 @@
                     {% comment %} {% if not forloop.last %}, {% endif %} {% endcomment %}
                 {% endfor %}
             </td>
-            <td>
-                <a href="{% url 'edit_team' team.id %}" class="btn btn-sm btn-primary">Edit</a>
-                <a href="{% url 'delete_team' team.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+            <td align="right">
+                <a href="{% url 'edit_team' team.id %}" class="btn btn-sm btn-outline-success">Edit</a>
+                <a href="{% url 'delete_team' team.id %}" class="btn btn-sm btn-outline-danger" 
+                    onclick="return confirm('Are you sure you want to delete {{ team.name }}?');">Delete</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+<br/>
+<div class="mb-3 text-end">
+    <a href="{% url 'create_team' %}" class="btn btn-outline-dark mb-3">Create New Team</a>
+</div>
 {% endblock %}

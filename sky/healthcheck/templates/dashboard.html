@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<h2 align="center">Welcome, {{ user.username }}</h2>
+<h2>Welcome, {{ user.first_name }} {{ user.last_name}} </h2>
 
 {% if user.userprofile.role == 'Admin' %}
     {% comment %} <a href="{% url 'manage_users' %}" class="btn btn-danger">Manage Users</a>
@@ -11,11 +11,15 @@
 {% elif user.userprofile.role == 'Department Leader' %}
     <hr>
     <h3>Your Department(s)</h3>
-    <table class="table table-striped">
-        <tr>
+    <table>
+        <colgroup>
+            <col style="width: 30%;">
+            <col style="width: 70%;">
+        </colgroup>
+        <thead>
             <th>Department Name</th>
             <th>Teams</th>
-        </tr>
+        </thead>
 
         {% for department in departments %}
             <tr>
@@ -29,17 +33,24 @@
             </tr>
         {% endfor %}
     </table>
-    <a href="{% url 'manage_departments' %}" class="btn btn-secondary">Manage Departments</a>
+    <br/>
+    <div class="mb-3 text-end">
+        <a href="{% url 'manage_departments' %}" class="btn btn-outline-dark">Manage Departments</a>
+    </div>
     <br/><br/>
 
 {% elif user.userprofile.role == 'Team Leader' %}
     <hr>
     <h3>Your Teams</h3>
-    <table class="table table-striped">
-        <tr>
+    <table>
+        <colgroup>
+            <col style="width: 30%;">
+            <col style="width: 70%;">
+        </colgroup>
+        <thead>
             <th>Team Name</th>
             <th>Engineers</th>
-        </tr>
+        </thead>
 
         {% for team in teams %}
             <tr>
@@ -52,16 +63,19 @@
             </tr>
         {% endfor %}
     </table>
-    <a href="{% url 'manage_teams' %}" class="btn btn-secondary">Manage Teams</a>
+    <br/>
+    <div class="mb-3 text-end">
+        <a href="{% url 'manage_teams' %}" class="btn btn-outline-dark">Manage Teams</a>
+    <div>
     <br/><br/>
     <hr>
-    <h3>Your Current Sessions</h3>
-    <table class="table table-striped">
-        <tr>
+    <h3 align="left">Your Current Sessions</h3>
+    <table>
+        <thead>
             <th>Session Name</th>
             <th>Team Name</th>
             <th>Questions</th>
-        </tr>
+        </thead>
 
         {% comment %} {% for session in sessions %}
             <tr>

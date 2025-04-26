@@ -8,7 +8,9 @@
         <label for="name">Team Name</label>
         <input type="text" name="name" id="name" class="form-control" required>
     </div>
-    <button type="submit" class="btn btn-success">Create Team</button>
-    <a href="{% url 'manage_teams' %}" class="btn btn-secondary">Cancel</a>
+    <div class="mb-3 text-center">
+        <button type="submit" class="btn btn-outline-success w-35">Create Team</button>
+        <a href="{% url 'manage_teams' %}" class="btn btn-outline-secondary w-25">Cancel</a>
+    </div>
 </form>
 {% endblock %}

@@ -8,7 +8,9 @@
         <label for="name">Department Name</label>
         <input type="text" name="name" id="name" class="form-control" required>
     </div>
-    <button type="submit" class="btn btn-success">Create Department</button>
-    <a href="{% url 'manage_departments' %}" class="btn btn-secondary">Cancel</a>
+    <div class="mb-3 text-center">
+        <button type="submit" class="btn btn-outline-success w-35">Create Department</button>
+        <a href="{% url 'manage_departments' %}" class="btn btn-outline-secondary w-25">Cancel</a>
+    </div>
 </form>
 {% endblock %}
