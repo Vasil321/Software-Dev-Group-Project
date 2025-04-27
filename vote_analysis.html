@@ -1,0 +1,39 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<h2>Vote Analysis Chart</h2>
+
+<!-- Creating a canvas for the chart -->
+<canvas id="voteChart"></canvas>
+
+<!-- Include Chart.js library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Parsing vote data passed from Django
+const voteData = {{ vote_data|safe }};
+
+// Extracting the  teams and sessions
+const teams = [...new Set(voteData.map(item => item.team__name))];
+const sessions = [...new Set(voteData.map(item => item.session__name))];
+
+// Creating the dataset for each session
+const datasets = sessions.map(session => ({
+    label: session,
+    data: teams.map(team => {
+        const match = voteData.find(d => d.team__name === team && d.session__name === session);
+        return match ? match.avg_vote : 0;
+    }),
+    borderWidth: 1
+}));
+
+// Rendering the bar chart
+new Chart(document.getElementById('voteChart'), {
+    type: 'bar',
+    data: {
+        labels: teams,
+        datasets: datasets
+    },
+});
+</script>
+{% endblock %}
