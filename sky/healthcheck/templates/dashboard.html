@@ -7,7 +7,38 @@
     {% comment %} <a href="{% url 'manage_users' %}" class="btn btn-danger">Manage Users</a>
     <a href="{% url 'manage_questions' %}" class="btn btn-primary">Manage Questions</a> {% endcomment %}
 {% elif user.userprofile.role == 'Senior Manager' %}
-    <div> Dashboard for Senior manager </div>
+    <hr>
+    <h3>Your Department(s)</h3>
+    <table>
+        <colgroup>
+            <col style="width: 30%;">
+            <col style="width: 70%;">
+        </colgroup>
+        <thead>
+            <th>Department Name</th>
+            <th>Teams</th>
+        </thead>
+
+        {% for department in departments %}
+            <tr>
+                <td>{{ department.name }}</td>
+                <td>
+
+                    {% for team in department.teams.all %}
+                        {{ team.name }} (Leader: {{team.leader.first_name}} {{team.leader.last_name}}) <br/>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br/>
+    <div class="mb-3 text-end">
+        <a href="{% url 'manage_departments' %}" class="btn btn-outline-dark">Manage Departments</a>
+    </div>
+    <br/><br/>
+
+
+
 {% elif user.userprofile.role == 'Department Leader' %}
     <hr>
     <h3>Your Department(s)</h3>
@@ -39,6 +70,37 @@
     </div>
     <br/><br/>
 
+
+
+    <hr>
+    <h3>Your Teams</h3>
+    <table>
+        <colgroup>
+            <col style="width: 30%;">
+            <col style="width: 70%;">
+        </colgroup>
+        <thead>
+            <th>Team Name</th>
+            <th>Engineers</th>
+        </thead>
+
+        {% for team in teams %}
+            <tr>
+                <td>{{ team.name }}</td>
+                <td>
+                    {% for engineer in team.engineers.all %}
+                        {{ engineer.first_name }} {{ engineer.last_name }} (Username: {{ engineer.username }}) <br/>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br/>
+    <div class="mb-3 text-end"> 
+        <a href="{% url 'manage_teams' %}" class="btn btn-outline-dark">Manage Teams</a>
+    </div>
+    <br/><br/>
+
 {% elif user.userprofile.role == 'Team Leader' %}
     <hr>
     <h3>Your Teams</h3>
@@ -66,22 +128,27 @@
     <br/>
     <div class="mb-3 text-end">
         <a href="{% url 'manage_teams' %}" class="btn btn-outline-dark">Manage Teams</a>
-    <div>
+    </div>
     <br/><br/>
     <hr>
-    <h3 align="left">Your Current Sessions</h3>
+    <h3 class="text-start">Your Current Sessions</h3>
     <table>
+        <colgroup>
+            <col style="width: 30%;">
+            <col style="width: 55%;">
+            <col style="width: 15%;">
+        </colgroup>        
         <thead>
             <th>Session Name</th>
-            <th>Team Name</th>
             <th>Questions</th>
+            <th></th>
         </thead>
 
-        {% comment %} {% for session in sessions %}
+        {% for session in sessions %}
             <tr>
-                <td>
+                <td style="text-align: left;">
                     {{ session }}
-                    <button class="btn btn-primary btn-sm" data-target="#collapseAnswer{{forloop.counter}}" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapseAnswer{{forloop.counter}}">
+                    <!-- <button class="btn btn-primary btn-sm" data-target="#collapseAnswer{{forloop.counter}}" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapseAnswer{{forloop.counter}}">
                         View answers
                     </button>
                     <div class="collapse" id="collapseAnswer{{ forloop.counter }}">
@@ -92,21 +159,39 @@
                                 {% endif %}
                             {% endfor %}
                         </div>
-                    </div>
+                    </div> -->
                 </td>
-                <td>{{ session.team }} </td>
-                <td>
+                <td style="text-align: left;">
+                    <p class="text-small">
                     {% for question in session.questions.all %}
                         {{ question.text }} <br/>
                     {% endfor %}
+                    </p>
                 </td>
+                <td style="text-align: end;">
+                    {% comment %}<a href="{% url 'view_statistic' session.id %}" class="btn btn-primary btn-sm">View Statistics</a> {% endcomment %}
+                    <a href="" class="btn btn-outline-success btn-sm">View Statistics</a>
+                </td>
+                <!-- <td>
+                    {% for question in session.questions.all %}
+                        {{ question.text }} <br/>
+                    {% endfor %}
+                </td> -->
             </tr>
-        {% endfor %} {% endcomment %}
+        {% endfor %}
 
     </table>
-    {% comment %} <a href="{% url 'create_session' %}" class="btn btn-info">Create Session</a> {% endcomment %}
+    <br/>
+    <div class="mb-3 text-end">
+        <a href="{% url 'create_session' %}" class="btn btn-outline-dark">Create Session</a>
+    </div>
+    <br/><br/>
+
+
 {% elif user.userprofile.role == 'Engineer' %}
     {% comment %} <a href="{% url 'answer_questions' %}" class="btn btn-success btn-sm">Answer Questions</a> {% endcomment %}
+    
+    
 {% endif %}
 
 

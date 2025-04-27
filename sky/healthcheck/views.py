@@ -1,6 +1,8 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import UserProfile, Team, Department
+from .models import UserProfile, Team, Department, Question, Response, HealthCheckSession
+from .forms import HealthCheckSessionForm, QuestionForm
+from django.http import HttpResponse
 from django.contrib.auth.models import User
 from .forms import UserRegistrationForm, UserSettingsForm, ChangePasswordForm
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
@@ -11,9 +13,15 @@ register view is used to register a new user.
 It renders the register.html template.
 '''
 def register(request):
+    error_message = None
     if request.method == 'POST':
+        
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
+            if len(request.POST["username"]) < 5 or len(request.POST["username"]) > 30:
+                error_message = "Username must be 5 to 30 characters long."
+                return render(request, 'register.html', {'form': form, 'error': error_message})
+
             user = form.save(commit=False)
             user.email = form.cleaned_data['email']
             user.set_password(form.cleaned_data['password1'])
@@ -30,6 +38,7 @@ user_login view is used to log in the user.
 It renders the login.html template.
 '''
 def user_login(request):
+    error_message = None
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -37,7 +46,10 @@ def user_login(request):
         if user:
             login(request, user)
             return redirect('dashboard')
-    return render(request, 'login.html')
+        else:
+            error_message = "Invalid username or password."
+    print(error_message)
+    return render(request, 'login.html', { 'error': error_message })
 
 '''
 user_logout view is used to log out the user.
@@ -55,11 +67,13 @@ It displays the user's role.
 def dashboard(request):
     if request.user.userprofile.role == 'Team Leader':
         teams = Team.objects.filter(leader=request.user)
-        return render(request, 'dashboard.html', {'teams' : teams})
+        sessions = HealthCheckSession.objects.filter(team_leader=request.user)
+        return render(request, 'dashboard.html', {'teams' : teams, 'sessions': sessions})
     
     if request.user.userprofile.role == 'Department Leader':
         departments = Department.objects.filter(leader=request.user)
-        return render(request, 'dashboard.html', {'departments' : departments})
+        teams = Team.objects.filter(department__in=departments)
+        return render(request, 'dashboard.html', {'departments' : departments, 'teams': teams})
 
     return render(request, 'dashboard.html')
 
@@ -239,3 +253,64 @@ def delete_department(request, department_id):
     department.delete()
     messages.success(request, f"Department {department.name} deleted successfully.")
     return redirect('manage_departments')
+
+
+'''
+Views for creating healthcheck session, adding questions and user voting
+'''
+@login_required
+def uservoting(request, session_id):
+    questions = Question.objects.all()
+    session = HealthCheckSession.objects.get(id=session_id)
+    questions = session.questions.all().order_by('id')
+    
+
+    if request.method == 'POST':
+        for question in questions:
+            answer = request.POST.get(f'question_{question.id}')
+            if answer:
+                Response.objects.update_or_create(
+                    user=request.user,
+                    question=question,
+                    defaults={'answer': answer}
+                )
+        return redirect('uservoting',  session_id=session.id)  # or wherever
+
+    return render(request, 'uservoting.html', {'session': session, 'questions': questions})
+
+@login_required
+def create_health_check_session(request):
+    if not request.user.userprofile.role == 'Team Leader':
+        return redirect('unauthorized')  # or use PermissionDenied
+
+    if request.method == 'POST':
+        form = HealthCheckSessionForm(request.POST)
+        if form.is_valid():
+            session = form.save(commit=False)
+            session.team_leader = request.user
+            session.save()
+            form.save_m2m()
+            return redirect('uservoting', session_id=session.id)
+    else:
+        form = HealthCheckSessionForm()
+
+    return render(request, 'create_session.html', {'form': form})
+
+
+
+@login_required
+def add_question(request):
+    if not request.user.userprofile.role == 'Team Leader':
+        return redirect('unauthorized')
+
+    if request.method == 'POST':
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.created_by = request.user
+            question.save()
+            return redirect('create_session')  # or another page
+    else:
+        form = QuestionForm()
+
+    return render(request, 'add_question.html', {'form': form})

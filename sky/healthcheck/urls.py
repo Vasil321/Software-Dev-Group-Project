@@ -2,6 +2,7 @@ from django.urls import path
 from .views import change_password, create_team, delete_team, edit_team, manage_teams
 from .views import register, user_login, dashboard, user_logout, user_settings
 from .views import manage_departments, create_department, edit_department, delete_department
+from .views import uservoting, create_health_check_session, add_question
 
 urlpatterns = [
     path('register/', register, name='register'),
@@ -17,5 +18,8 @@ urlpatterns = [
     path('departments/', manage_departments, name='manage_departments'),
     path('departments/create/', create_department, name='create_department'),
     path('departments/edit/<int:department_id>/', edit_department, name='edit_department'),
-    path('departments/delete/<int:department_id>/', delete_department, name='delete_department')
+    path('departments/delete/<int:department_id>/', delete_department, name='delete_department'),
+    path('uservoting/<int:session_id>/', uservoting, name='uservoting'),
+    path('create-session/',create_health_check_session, name='create_session'),
+    path('add_question/', add_question, name='add_question'),
 ]

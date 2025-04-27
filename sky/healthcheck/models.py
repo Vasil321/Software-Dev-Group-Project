@@ -43,3 +43,54 @@ class Department(models.Model):
 
     def _str_(self):
         return self.name
+    
+
+'''
+Question model is used to store the questions for the health check.
+It has a text field to store the question.
+'''
+class Question(models.Model):
+    text = models.TextField()
+
+    def __str__(self):
+        return self.text
+
+
+'''
+Response model is used to store the responses for an user to a specific question for the health check.
+It has a foreign key to the User model to store the user.
+It has a foreign key to the Question model to store the question.
+It has a char field to store the answer.
+It has a timestamp field to store the timestamp of when the response was created.
+'''
+class Response(models.Model):
+    TRAFFIC_LIGHT_CHOICES = [
+        ('green', 'Very Good'),
+        ('yellow', 'Not That Good'),
+        ('red', 'Very Bad'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answer = models.CharField(max_length=10, choices=TRAFFIC_LIGHT_CHOICES)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.question.text[:30]} - {self.answer}"
+
+
+'''
+HealthCheckSession model is used to store the health check session details.
+It has a name field to store the name of the session.
+It has a many-to-many relationship with the Question model.
+It has a foreign key to the User model to store the team leader.
+It has a created_at field to store the timestamp of when the session was created.
+'''
+class HealthCheckSession(models.Model):
+    name = models.CharField(max_length=100)
+    team_leader = models.ForeignKey(User, on_delete=models.CASCADE)
+    questions = models.ManyToManyField(Question)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name

@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% block title %}SKY HealthCheck{% endblock %}
+{% block content %}
+
+<style>
+
+.questionnaire-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .progress-steps {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-dot {
+      width: 14px;
+      height: 14px;
+      background-color: #ccc;
+      border-radius: 50%;
+    }
+
+    .progress-dot.active {
+      background-color: #000;
+    }
+
+    .traffic-light-box {
+      border: 2px solid #ccc;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 300px;
+      border-radius: 12px;
+      background-color: white;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .traffic-light {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+    }
+
+    .light {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ddd;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .light.selected {
+      transform: scale(1.2);
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .light.green { background-color: #28a745; }
+    .light.yellow { background-color: #ffc107; }
+    .light.red { background-color: #dc3545; }
+
+    .btn-continue {
+      margin-top: 1.5rem;
+      padding: 10px 20px;
+      background-color: #000;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .btn-continue:hover {
+      background-color: #333;
+    }
+
+    .thank-you-message {
+      display: none;
+      text-align: center;
+      font-size: 1.5rem;
+      color: green;
+      margin-top: 2rem;
+    }
+
+  </style>
+
+
+   <!-- MAIN CONTENT -->
+   <main class="flex-grow-1">
+    <div class="content-wrapper">
+      <div class="questionnaire-container">
+        <div class="progress-steps" id="progressSteps">
+          <!-- Dots will be generated here -->
+        </div>
+
+        <h2 id="questionTitle"><strong>Delivering Value</strong></h2>
+
+        <div class="traffic-light-box">
+          <div class="traffic-light" id="trafficLight">
+            <div class="light green" data-value="green"></div>
+            <div class="light yellow" data-value="yellow"></div>
+            <div class="light red" data-value="red"></div>
+          </div>
+        </div>
+
+        <p id="questionDescription" style="font-size: 1.2rem;">We deliver great stuff!<br>Our stakeholders are happy.</p>
+
+        <button class="btn-continue" id="continueBtn">Continue</button>
+      </div>
+
+      <div class="thank-you-message" id="thankYouMessage">
+        <h3>Thank you for completing the survey!</h3>
+        <p>Your feedback is greatly appreciated.</p>
+      </div>
+    </div>
+  </main>
+
+  
+
+  <!-- FOOTER -->
+  <!-- <div class="footer-fade"></div> -->
+
+  <!-- Modal -->
+  <div class="modal fade" id="noAnswerModal" tabindex="-1" aria-labelledby="noAnswerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-header">
+          <h5 class="modal-title w-100" id="noAnswerModalLabel">Hold on!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Please select a traffic light option before continuing.
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-dark" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOTSTRAP JS + INTERACTIVITY -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const questions = [
+      { title: "Delivering Value", description: "We deliver great stuff!<br>Our stakeholders are happy." },
+      { title: "Team Health", description: "Our team is resilient and supportive of each other." },
+      { title: "Code Quality", description: "We’re proud of the code we write!" },
+      { title: "Support", description: "We get the support we need from outside the team." },
+      { title: "Speed", description: "We deliver quickly and often." },
+      { title: "Fun", description: "We genuinely enjoy working together!" },
+      { title: "Mission", description: "We know why we're here and how our work aligns." },
+      { title: "Learning", description: "We are always learning and improving." },
+      { title: "Ownership", description: "We feel ownership and autonomy over our work." },
+      { title: "Process", description: "Our process helps us, not hinders us." }
+    ];
+
+    let currentQuestion = 0;
+    const totalQuestions = questions.length;
+
+    const titleEl = document.getElementById("questionTitle");
+    const descEl = document.getElementById("questionDescription");
+    const continueBtn = document.getElementById("continueBtn");
+    const trafficLight = document.getElementById("trafficLight");
+    const progressSteps = document.getElementById("progressSteps");
+    const thankYouMessage = document.getElementById("thankYouMessage");
+
+    // Generate progress dots
+    for (let i = 0; i < totalQuestions; i++) {
+      const dot = document.createElement("div");
+      dot.classList.add("progress-dot");
+      if (i === 0) dot.classList.add("active");
+      progressSteps.appendChild(dot);
+    }
+
+    const dots = document.querySelectorAll(".progress-dot");
+    let selectedLight = null;
+
+    trafficLight.addEventListener("click", (e) => {
+      if (e.target.classList.contains("light")) {
+        document.querySelectorAll(".light").forEach(l => l.classList.remove("selected"));
+        e.target.classList.add("selected");
+        selectedLight = e.target.dataset.value;
+      }
+    });
+
+    continueBtn.addEventListener("click", () => {
+      if (!selectedLight) {
+        const modal = new bootstrap.Modal(document.getElementById('noAnswerModal'));
+        modal.show();
+        return;
+      }
+
+      selectedLight = null;
+      document.querySelectorAll(".light").forEach(l => l.classList.remove("selected"));
+
+      if (currentQuestion < totalQuestions - 1) {
+        currentQuestion++;
+        titleEl.innerHTML = `<strong>${questions[currentQuestion].title}</strong>`;
+        descEl.innerHTML = questions[currentQuestion].description;
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle("active", idx === currentQuestion);
+        });
+      } else {
+        // Hide questionnaire and show the thank you message
+        document.querySelector(".questionnaire-container").style.display = "none";
+        thankYouMessage.style.display = "block";
+      }
+    });
+  </script>
+
+{% endblock %}
+

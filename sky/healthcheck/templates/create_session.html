@@ -1,0 +1,15 @@
+
+{% extends 'base.html' %}
+{% block title %}Create Session{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  <h2>Create Health Check Session</h2>
+  <form method="post">
+    <a href="{% url 'add_question' %}" class="btn btn-info">Add Questions</a>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-dark">Create Session</button>
+  </form>
+</div>
+{% endblock %}

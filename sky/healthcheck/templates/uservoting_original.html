@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% block title %}SKY HealthCheck{% endblock %}
+{% block content %}
+
+<style>
+
+
+    .questionnaire-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .progress-steps {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-dot {
+      width: 14px;
+      height: 14px;
+      background-color: #ccc;
+      border-radius: 50%;
+    }
+
+    .progress-dot.active {
+      background-color: #000;
+    }
+
+    .traffic-light-box {
+      border: 2px solid #ccc;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 300px;
+      border-radius: 12px;
+      background-color: white;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .traffic-light {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+      
+    }
+
+    .traffic-light::hoover{
+        opacity: 70%;
+    }
+
+    .light {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ddd;
+    }
+
+    .light.green {
+      background-color: #28a745;
+    }
+
+    .light.yellow {
+      background-color: #ffc107;
+    }
+
+    .light.red {
+      background-color: #dc3545;
+    }
+
+    .btn-continue {
+      margin-top: 1.5rem;
+      padding: 10px 20px;
+      background-color: #000;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .btn-continue:hover {
+      background-color: #333;
+    }
+
+  </style>
+
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-grow-1">
+    <div class="content-wrapper">
+      <div class="questionnaire-container">
+        <div class="progress-steps">
+          <div class="progress-dot active"></div>
+          <div class="progress-dot"></div>
+          <div class="progress-dot"></div>
+          <div class="progress-dot"></div>
+          <div class="progress-dot"></div>
+          <div class="progress-dot"></div>
+          <div class="progress-dot"></div>
+          <div class="progress-dot"></div>
+          <div class="progress-dot"></div>
+          <div class="progress-dot"></div>
+        </div>
+
+        <h2><strong>Delivering Value</strong></h2>
+
+        <form method="post" id="question-form">
+            {% csrf_token %}
+          
+            <div class="questionnaire-container">
+                {% for question in questions %}
+                  <div class="question-slide {% if forloop.first %}active{% endif %}" data-question-id="{{ question.id }}">
+                    <h2><strong>{{ question.text }}</strong></h2>
+              
+                    <div class="traffic-light-box">
+                      <div class="traffic-light">
+                        <button type="button" class="light green" data-answer="green"></button>
+                        <button type="button" class="light yellow" data-answer="yellow"></button>
+                        <button type="button" class="light red" data-answer="red"></button>
+                      </div>
+                    </div>
+              
+                    <p style="font-size: 1.2rem;">Choose how you feel about this.</p>
+                    <button type="button" class="btn-continue" style="display:none;">Continue</button>
+                  </div>
+                {% endfor %}
+              </div>
+              
+              <div class="progress-steps">
+                {% for question in questions %}
+                  <div class="progress-dot {% if forloop.first %}active{% endif %}"></div>
+                {% endfor %}
+                <!-- Submit Button -->
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button id="submit-btn" class="btn-continue" style="display: none;">Submit Answers</button>
+                </div>
+  
+              </div>
+              
+          </form>
+          
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <div class="footer-fade"></div>
+
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const slides = document.querySelectorAll('.question-slide');
+      const dots = document.querySelectorAll('.progress-dot');
+      const submitBtn = document.getElementById('submit-btn');
+      let current = 0;
+    
+      const showSlide = (index) => {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle('active', i === index);
+          const continueBtn = slide.querySelector('.btn-continue');
+          if (continueBtn) {
+            continueBtn.style.display = i === index ? 'inline-block' : 'none';
+          }
+        });
+    
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === index);
+        });
+    
+        // Show submit button only on last slide
+        if (index === slides.length - 1) {
+          submitBtn.style.display = 'inline-block';
+        } else {
+          submitBtn.style.display = 'none';
+        }
+      };
+    
+      slides.forEach((slide, i) => {
+        const buttons = slide.querySelectorAll('.light');
+        const continueBtn = slide.querySelector('.btn-continue');
+    
+        buttons.forEach(button => {
+          button.addEventListener('click', (e) => {
+            e.preventDefault();
+            buttons.forEach(b => b.classList.remove('selected'));
+            button.classList.add('selected');
+            if (continueBtn) continueBtn.style.display = 'inline-block';
+          });
+        });
+    
+        if (continueBtn) {
+          continueBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (current < slides.length - 1) {
+              current++;
+              showSlide(current);
+            }
+          });
+        }
+      });
+    
+      // Submit button logic (hook up form submission here)
+      submitBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('Submitting answers...'); // Replace this with actual form submission
+        // Optionally: collect selected answers & send to Django
+      });
+    
+      showSlide(0); // initialize
+    });
+    </script>
+    
+    <style>
+    .light.selected {
+      box-shadow: 0 0 10px 2px #333;
+      transform: scale(1.1);
+      transition: all 0.2s ease;
+    }
+    .question-slide {
+      display: none;
+    }
+    .question-slide.active {
+      display: block;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    </style>
+
+
+
+{% endblock %}

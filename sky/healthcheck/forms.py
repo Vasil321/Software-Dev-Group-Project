@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.password_validation import validate_password
-from .models import UserProfile
+from .models import UserProfile, Team, Department, Question, Response, HealthCheckSession
 
 '''
 UserRegistrationForm is used to register a new user.
@@ -72,3 +72,29 @@ class ChangePasswordForm(PasswordChangeForm):
         if new_password1 and new_password2 and new_password1 != new_password2:
             raise forms.ValidationError("Passwords do not match.")
         return new_password2
+    
+
+
+'''
+Forms for Responses Questions and Session
+'''
+class ResponseForm(forms.ModelForm):
+    class Meta:
+        model = Response
+        fields = ['answer']
+        widgets = {
+            'answer': forms.RadioSelect(choices=Response.TRAFFIC_LIGHT_CHOICES)
+        }
+
+class QuestionForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = ['text']
+
+class HealthCheckSessionForm(forms.ModelForm):
+    class Meta:
+        model = HealthCheckSession
+        fields = ['name', 'questions']
+        widgets = {
+            'questions': forms.CheckboxSelectMultiple()
+        }
