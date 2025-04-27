@@ -13,15 +13,14 @@
         <label for="engineers">Assign Engineers</label>
         <select name="engineers" id="engineers" class="form-control" multiple>
             {% for engineer in engineers %}
-            <option value="{{ engineer.id }}" {% if engineer in team.engineers.all %}selected{% endif %}>
+            <option value="{{ engineer.id }}" {% if engineer in team.members.all %}selected{% endif %}>
                 {{ engineer.username }}
             </option>
             {% endfor %}
         </select>
     </div>
-    <div class="mb-3 text-center">
-        <button type="submit" class="btn btn-outline-success w-35">Save Changes</button>
-        <a href="{% url 'manage_teams' %}" class="btn btn-outline-secondary w-25">Cancel</a>
-    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a href="{% url 'manage_teams' %}" class="btn btn-secondary">Cancel</a>
 </form>
 {% endblock %}

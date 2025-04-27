@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<h2>Welcome, {{ user.first_name }} {{ user.last_name}} </h2>
+<h2>Welcome, {{ user.username }}</h2>
 
 {% if user.userprofile.role == 'Admin' %}
     {% comment %} <a href="{% url 'manage_users' %}" class="btn btn-danger">Manage Users</a>
@@ -9,48 +9,15 @@
 {% elif user.userprofile.role == 'Senior Manager' %}
     <div> Dashboard for Senior manager </div>
 {% elif user.userprofile.role == 'Department Leader' %}
-    <hr>
-    <h3>Your Department(s)</h3>
-    <table>
-        <colgroup>
-            <col style="width: 30%;">
-            <col style="width: 70%;">
-        </colgroup>
-        <thead>
-            <th>Department Name</th>
-            <th>Teams</th>
-        </thead>
-
-        {% for department in departments %}
-            <tr>
-                <td>{{ department.name }}</td>
-                <td>
-
-                    {% for team in department.teams.all %}
-                        {{ team.name }} (Leader: {{team.leader.first_name}} {{team.leader.last_name}}) <br/>
-                    {% endfor %}
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
-    <br/>
-    <div class="mb-3 text-end">
-        <a href="{% url 'manage_departments' %}" class="btn btn-outline-dark">Manage Departments</a>
-    </div>
-    <br/><br/>
-
+    <div> Dashboard for Department leader </div>
 {% elif user.userprofile.role == 'Team Leader' %}
     <hr>
     <h3>Your Teams</h3>
-    <table>
-        <colgroup>
-            <col style="width: 30%;">
-            <col style="width: 70%;">
-        </colgroup>
-        <thead>
+    <table class="table table-striped">
+        <tr>
             <th>Team Name</th>
             <th>Engineers</th>
-        </thead>
+        </tr>
 
         {% for team in teams %}
             <tr>
@@ -63,19 +30,17 @@
             </tr>
         {% endfor %}
     </table>
-    <br/>
-    <div class="mb-3 text-end">
-        <a href="{% url 'manage_teams' %}" class="btn btn-outline-dark">Manage Teams</a>
-    <div>
+    <a href="{% url 'manage_teams' %}" class="btn btn-info">Manage Teams</a>
+    <a href="{% url 'create_session' %}" class="btn btn-info">Create Session</a>
     <br/><br/>
     <hr>
-    <h3 align="left">Your Current Sessions</h3>
-    <table>
-        <thead>
+    <h3>Your Current Sessions</h3>
+    <table class="table table-striped">
+        <tr>
             <th>Session Name</th>
             <th>Team Name</th>
             <th>Questions</th>
-        </thead>
+        </tr>
 
         {% comment %} {% for session in sessions %}
             <tr>

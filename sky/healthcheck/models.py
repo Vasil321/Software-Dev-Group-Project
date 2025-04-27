@@ -32,14 +32,38 @@ class Team(models.Model):
 
     def _str_(self):
         return self.name
+    
+class Question(models.Model):
+    text = models.TextField()
 
-'''
-Department model is used to store department details.
-'''
-class Department(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='led_departments')
-    teams = models.ManyToManyField(Team, blank=True)
+    def __str__(self):
+        return self.text
 
-    def _str_(self):
+
+
+
+
+class Response(models.Model):
+    TRAFFIC_LIGHT_CHOICES = [
+        ('green', 'Very Good'),
+        ('yellow', 'Not That Good'),
+        ('red', 'Very Bad'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answer = models.CharField(max_length=10, choices=TRAFFIC_LIGHT_CHOICES)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.question.text[:30]} - {self.answer}"
+
+
+class HealthCheckSession(models.Model):
+    name = models.CharField(max_length=100)
+    team_leader = models.ForeignKey(User, on_delete=models.CASCADE)
+    questions = models.ManyToManyField(Question)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
         return self.name
