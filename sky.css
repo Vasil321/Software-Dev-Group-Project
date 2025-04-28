@@ -1,0 +1,103 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f9f9f9;
+}
+
+/* Navbar */
+.navbar-custom {
+  background-color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navbar-right {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.navbar-brand img {
+  height: 40px;
+  width: auto;
+}
+
+.nav-link {
+  font-weight: 600;
+  color: #000 !important;
+  padding: 6px 16px;
+  border-radius: 6px;
+  background: #eee;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.nav-link:hover {
+  background: #ddd;
+}
+
+.btn-logout {
+  background: #000 !important;
+  color: white !important;
+}
+
+.btn-logout:hover {
+  background: #333 !important;
+}
+
+/* Align Navbar Items Horizontally */
+.navbar-right {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+/* Page Content */
+.content-wrapper {
+  flex: 1;
+  padding: 2rem;
+  width: 100%;
+  max-width: 900px;
+  margin: auto;
+}
+
+/* Footer */
+.footer-fade {
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(to right, #e60000, #8e2de2, #00c6ff);
+}
+
+@media (max-width: 768px) {
+  .navbar-custom {
+    padding: 1rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .navbar-left,
+  .navbar-right {
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .content-wrapper {
+    padding: 1rem;
+  }
+}

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}SKY HealthCheck{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+    }
+    .navbar-custom { /* Navbar styles */ }
+    .content-wrapper { /* Content area styles */ }
+    .footer-fade { /* Footer gradient */ }
+    .questionnaire-container { /* Quiz container styles */ }
+    .progress-steps { /* Progress bar container */ }
+    .progress-dot { /* Individual progress dots */ }
+    .progress-dot.active { background-color: #000; }
+    .traffic-light-box { /* Traffic light container */ }
+    .traffic-light { /* Traffic light flexbox */ }
+    .light {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ddd;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .light.green { background-color: #28a745; }
+    .light.yellow { background-color: #ffc107; }
+    .light.red { background-color: #dc3545; }
+    .light.selected {
+      border: 3px solid black;
+      transform: scale(1.1);
+    }
+    .btn-continue { /* Continue button styles */ }
+    #thankYouMessage {
+      display: none;
+      text-align: center;
+      padding: 50px;
+    }
+    @media (max-width: 768px) { /* Responsive styles */ }
+  </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <nav class="navbar-custom">
+    <div class="navbar-brand">
+      <img src="https://cdn.discordapp.com/attachments/902903414772600843/1365043785792225340/image.png?ex=68107cd7&is=680f2b57&hm=fb2bc9eb711526b9160adc1c6c0bffc221c146377bd87abe0b45e0b49e76d704&" alt="Sky Logo" />
+    </div>
+    <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+    <a class="nav-link" href="{% url 'settings' %}">Settings</a>
+    <a class="nav-link" href="{% url 'change_password' %}">Password</a>
+    <a class="nav-link btn-logout" href="{% url 'logout' %}">Logout</a>
+    <a class="nav-link" href="{% url 'login' %}">Login</a>
+    <a class="nav-link" href="{% url 'register' %}">Register</a>
+  </nav>
+
+  <main class="flex-grow-1">
+    <div class="content-wrapper">
+      <!-- Quiz Section -->
+      <div class="questionnaire-container" id="quizContainer">
+        <div class="progress-steps" id="progressSteps"></div>
+        <h2 id="questionTitle"><strong>Delivering Value</strong></h2>
+        <div class="traffic-light-box">
+          <div class="traffic-light">
+            <div class="light green" data-choice="green"></div>
+            <div class="light yellow" data-choice="yellow"></div>
+            <div class="light red" data-choice="red"></div>
+          </div>
+        </div>
+        <p id="questionText" style="font-size: 1.2rem;">We deliver great stuff!<br>Our stakeholders are happy.</p>
+        <button class="btn-continue" id="continueButton" disabled>Continue</button>
+      </div>
+
+      <!-- Thank You Section -->
+      <div id="thankYouMessage">
+        <h2><strong>Thank you for completing the Health Check!</strong></h2>
+        <p style="font-size: 1.2rem;">Your feedback has been recorded.</p>
+      </div>
+    </div>
+  </main>
+
+  <div class="footer-fade"></div>
+
+  <script>
+    // Questions list
+    const questions = [
+      { title: "Delivering Value", text: "We deliver great stuff! Our stakeholders are happy." },
+      { title: "Health of Codebase", text: "Our code is clean, tested, and always improving." },
+      { title: "Easy to Release", text: "Releases are simple, frequent, and low-risk." },
+      { title: "Team Morale", text: "We are happy, engaged, and feel respected." },
+      { title: "Learning", text: "We are learning valuable skills for ourselves and the company." },
+      { title: "Speed", text: "We get things done quickly without sacrificing quality." },
+      { title: "Mission", text: "We understand why our work matters." },
+      { title: "Ownership", text: "We have autonomy and take responsibility." },
+      { title: "Support", text: "We have the support we need from leadership." },
+      { title: "Pawns or Players", text: "We are involved in decisions that affect us." }
+    ];
+
+    let currentQuestion = 0;
+    const selections = Array(questions.length).fill(null);
+
+    const quizContainer = document.getElementById('quizContainer');
+    const thankYouMessage = document.getElementById('thankYouMessage');
+    const questionTitle = document.getElementById('questionTitle');
+    const questionText = document.getElementById('questionText');
+    const continueButton = document.getElementById('continueButton');
+    const lights = document.querySelectorAll('.light');
+    const progressSteps = document.getElementById('progressSteps');
+
+    // Update progress dots
+    function updateProgress() {
+      progressSteps.innerHTML = '';
+      questions.forEach((_, idx) => {
+        const dot = document.createElement('div');
+        dot.classList.add('progress-dot');
+        if (idx === currentQuestion) dot.classList.add('active');
+        progressSteps.appendChild(dot);
+      });
+    }
+
+    // Load current question
+    function loadQuestion() {
+      const q = questions[currentQuestion];
+      questionTitle.innerHTML = `<strong>${q.title}</strong>`;
+      questionText.innerHTML = q.text;
+      lights.forEach(light => light.classList.remove('selected'));
+      continueButton.disabled = selections[currentQuestion] === null;
+      updateProgress();
+    }
+
+    // Traffic light click event
+    lights.forEach(light => {
+      light.addEventListener('click', () => {
+        selections[currentQuestion] = light.dataset.choice;
+        lights.forEach(l => l.classList.remove('selected'));
+        light.classList.add('selected');
+        continueButton.disabled = false;
+      });
+    });
+
+    // Continue button event
+    continueButton.addEventListener('click', () => {
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+      } else {
+        quizContainer.style.display = 'none';
+        thankYouMessage.style.display = 'block';
+        console.log("User Selections:", selections);
+      }
+    });
+
+    // Start with the first question
+    loadQuestion();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
