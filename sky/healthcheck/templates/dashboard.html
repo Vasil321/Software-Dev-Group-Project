@@ -38,7 +38,6 @@
     <br/><br/>
 
 
-
 {% elif user.userprofile.role == 'Department Leader' %}
     <hr>
     <h3>Your Department(s)</h3>
@@ -70,36 +69,6 @@
     </div>
     <br/><br/>
 
-
-
-    <hr>
-    <h3>Your Teams</h3>
-    <table>
-        <colgroup>
-            <col style="width: 30%;">
-            <col style="width: 70%;">
-        </colgroup>
-        <thead>
-            <th>Team Name</th>
-            <th>Engineers</th>
-        </thead>
-
-        {% for team in teams %}
-            <tr>
-                <td>{{ team.name }}</td>
-                <td>
-                    {% for engineer in team.engineers.all %}
-                        {{ engineer.first_name }} {{ engineer.last_name }} (Username: {{ engineer.username }}) <br/>
-                    {% endfor %}
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
-    <br/>
-    <div class="mb-3 text-end"> 
-        <a href="{% url 'manage_teams' %}" class="btn btn-outline-dark">Manage Teams</a>
-    </div>
-    <br/><br/>
 
 {% elif user.userprofile.role == 'Team Leader' %}
     <hr>
@@ -172,11 +141,6 @@
                     {% comment %}<a href="{% url 'view_statistic' session.id %}" class="btn btn-primary btn-sm">View Statistics</a> {% endcomment %}
                     <a href="" class="btn btn-outline-success btn-sm">View Statistics</a>
                 </td>
-                <!-- <td>
-                    {% for question in session.questions.all %}
-                        {{ question.text }} <br/>
-                    {% endfor %}
-                </td> -->
             </tr>
         {% endfor %}
 
@@ -189,8 +153,45 @@
 
 
 {% elif user.userprofile.role == 'Engineer' %}
-    {% comment %} <a href="{% url 'answer_questions' %}" class="btn btn-success btn-sm">Answer Questions</a> {% endcomment %}
+    {% comment %}<a href="{% url 'answer_questions' %}" class="btn btn-success btn-sm">Answer Questions</a> {% endcomment %}
     
+    <hr>
+    <h3 class="text-start">Sessions open for you</h3>
+    <table>
+        <colgroup>
+            <col style="width: 30%;">
+            <col style="width: 55%;">
+            <col style="width: 15%;">
+        </colgroup>        
+        <thead>
+            <th>Session Name</th>
+            <th>Questions</th>
+            <th></th>
+        </thead>
+
+        {% for session in sessions %}
+            <tr>
+                <td style="text-align: left;">
+                    {{ session }}
+                </td>
+                <td style="text-align: left;">
+                    <p class="text-small">
+                    {% for question in session.questions.all %}
+                        {{ question.text }} <br/>
+                    {% endfor %}
+                    </p>
+                </td>
+                <td style="text-align: end;">
+                    <a href="{% url 'uservoting' session.id %}" class="btn btn-outline-success btn-sm">Start Voting</a> 
+                    {% comment %}<a href="" class="btn btn-outline-success btn-sm">View Statistics</a>{% endcomment %}
+                </td>
+            </tr>
+        {% endfor %}
+
+    </table>
+    <br/>
+
+
     
 {% endif %}
 

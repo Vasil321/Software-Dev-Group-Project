@@ -74,6 +74,12 @@ def dashboard(request):
         departments = Department.objects.filter(leader=request.user)
         teams = Team.objects.filter(department__in=departments)
         return render(request, 'dashboard.html', {'departments' : departments, 'teams': teams})
+    
+    if request.user.userprofile.role == 'Engineer':
+        teams = Team.objects.filter(engineers=request.user)
+        team_leaders = teams.values_list('leader', flat=True).distinct()
+        sessions = HealthCheckSession.objects.filter(team_leader__in=team_leaders)
+        return render(request, 'dashboard.html', {'teams' : teams, 'sessions': sessions})
 
     return render(request, 'dashboard.html')
 
@@ -119,7 +125,7 @@ It renders the manage_teams.html template.
 '''
 @login_required
 def manage_teams(request):
-    if not request.user.userprofile.role == 'Team Leader':
+    if not request.user.userprofile.role == 'Team Leader' and not request.user.userprofile.role == 'Department Leader':
         messages.error(request, 'Access Denied.')
         return redirect('dashboard')
     
@@ -290,7 +296,8 @@ def create_health_check_session(request):
             session.team_leader = request.user
             session.save()
             form.save_m2m()
-            return redirect('uservoting', session_id=session.id)
+            # return redirect('uservoting', session_id=session.id)
+            return redirect('dashboard')  # or another page
     else:
         form = HealthCheckSessionForm()
 
