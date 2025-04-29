@@ -1,0 +1,27 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<h2>Team Progress Report</h2>
+
+<!-- Team selection dropdown -->
+<form method="get">
+    <label>Select Team:</label>
+    <select name="team">
+        {% for t in teams %}
+        <option value="{{ t.name }}" {% if selected_team == t.name %}selected{% endif %}>{{ t.name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">View</button>
+</form>
+
+<!-- Session summary table -->
+{% if session_summary %}
+    <ul>
+    {% for session in session_summary %}
+        <li><b>Session:</b> {{ session.session__name }} – <b>Average Vote:</b> {{ session.avg_vote|floatformat:2 }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No votes found for the selected team.</p>
+{% endif %}
+{% endblock %}

@@ -4,9 +4,12 @@ from .models import UserProfile, Team, Department, Question, Response, HealthChe
 from .forms import HealthCheckSessionForm, QuestionForm
 from django.http import HttpResponse
 from django.contrib.auth.models import User
-from .forms import UserRegistrationForm, UserSettingsForm, ChangePasswordForm
+from .forms import UserRegistrationForm, UserSettingsForm, ChangePasswordForm, UserUpdateForm
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+
+from django.db.models import Avg
+
 
 '''
 register view is used to register a new user.
@@ -51,6 +54,7 @@ def user_login(request):
     print(error_message)
     return render(request, 'login.html', { 'error': error_message })
 
+
 '''
 user_logout view is used to log out the user.
 It redirects the user to the login page.
@@ -59,12 +63,24 @@ def user_logout(request):
     logout(request)
     return redirect('login')
 
+
 '''
 dashboard view is used to render the dashboard.html template.
 It displays the user's role.
 '''
 @login_required
 def dashboard(request):
+    if request.user.userprofile.role == 'Admin':
+        teams = Team.objects.all()
+        departments = Department.objects.all()
+        users = User.objects.all()
+        return render(request, 'dashboard.html', {'users' : users, 'teams' : teams, 'departments': departments})
+
+    if request.user.userprofile.role == 'Senior Manager':
+        departments = Department.objects.all()
+        teams = Team.objects.all()
+        return render(request, 'dashboard.html', {'departments' : departments, 'teams': teams})
+
     if request.user.userprofile.role == 'Team Leader':
         teams = Team.objects.filter(leader=request.user)
         sessions = HealthCheckSession.objects.filter(team_leader=request.user)
@@ -90,14 +106,61 @@ It renders the settings.html template.
 '''
 @login_required
 def user_settings(request):
+
     if request.method == 'POST':
         form = UserSettingsForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
             return redirect('dashboard')
+        
     else:
         form = UserSettingsForm(instance=request.user)
+        
     return render(request, 'settings.html', {'form': form})
+
+
+'''
+user_update view is used to update the user's first name, last name and email.
+It is only accessible by the app admin.
+It renders the user_update.html template.
+'''
+@login_required
+def user_update(request, username):
+    if not request.user.userprofile.role == 'Admin':
+        messages.error(request, 'Access Denied.')
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        user = get_object_or_404(User, username=username)
+        form = UserUpdateForm(request.POST, instance=user, role_initial=request.POST.get('role'))
+        if form.is_valid():
+            form.save()
+            user_profile = user.userprofile
+            user_profile.role = form.cleaned_data['role']
+            user_profile.save()
+            return redirect('dashboard')
+    else:
+        user = get_object_or_404(User, username=username)
+        form = UserUpdateForm(instance=user, role_initial=user.userprofile.role)
+
+    return render(request, 'user_update.html', {'form': form})
+
+
+'''
+delete_team view is used to delete a team.
+It redirects the user to the manage_teams page.
+'''
+@login_required
+def delete_user(request, username):
+    if not request.user.userprofile.role == 'Admin':
+        messages.error(request, 'Access Denied.')
+        return redirect('dashboard')
+    
+    user = get_object_or_404(User, username=username)
+    user.delete()
+    return redirect('dashboard')
+
+
 
 '''
 change_password view is used to change the user's password.
@@ -119,6 +182,7 @@ def change_password(request):
 
     return render(request, "change_password.html", {"form": form})
 
+
 '''
 manage_teams view is used to manage the teams.
 It renders the manage_teams.html template.
@@ -132,24 +196,35 @@ def manage_teams(request):
     teams = Team.objects.filter(leader=request.user)
     return render(request, 'manage_teams.html', {'teams': teams})
 
+
 '''
 create_team view is used to create a team.
 It renders the create_team.html template.
 '''
 @login_required
 def create_team(request):
-    if not request.user.userprofile.role == 'Team Leader':
+    if not request.user.userprofile.role == 'Team Leader' and not request.user.userprofile.role == 'Admin':
         messages.error(request, 'Access Denied.')
         return redirect('dashboard')
     
     if request.method == 'POST':
         name = request.POST.get('name')
         engineers = request.POST.getlist('engineers')
-        team = Team.objects.create(name=name, leader=request.user)
+
+        team_leader = request.user
+        if request.user.userprofile.role == 'Admin':
+            team_leader = User.objects.get(id=request.POST.get('leader'))
+        team = Team.objects.create(name=name, leader=team_leader)
+        
         messages.success(request, f"Team {name} created successfully.")
-        return redirect('manage_teams')
+        return redirect('dashboard')
     
-    return render(request, 'create_team.html')
+    users = User.objects.all()
+    if request.user.userprofile.role == 'Admin':
+        users = User.objects.filter(userprofile__role='Team Leader')
+
+    return render(request, 'create_team.html', {'users': users})
+
 
 '''
 edit_team view is used to edit a team.
@@ -157,7 +232,7 @@ It renders the edit_team.html template.
 '''
 @login_required
 def edit_team(request, team_id):
-    if not request.user.userprofile.role == 'Team Leader':
+    if not request.user.userprofile.role == 'Team Leader' and not request.user.userprofile.role == 'Admin':
         messages.error(request, 'Access Denied.')
         return redirect('dashboard')
     
@@ -170,9 +245,10 @@ def edit_team(request, team_id):
         team.engineers.set(User.objects.filter(id__in=selected_engineers))
         team.save()
         messages.success(request, f"Team {team.name} updated successfully.")
-        return redirect('manage_teams')
+        return redirect('dashboard')
     
     return render(request, 'edit_team.html', {'team': team, 'engineers': engineers})
+
 
 '''
 delete_team view is used to delete a team.
@@ -180,14 +256,15 @@ It redirects the user to the manage_teams page.
 '''
 @login_required
 def delete_team(request, team_id):
-    if not request.user.userprofile.role == 'Team Leader':
+    if not request.user.userprofile.role == 'Team Leader' and not request.user.userprofile.role == 'Admin':
         messages.error(request, 'Access Denied.')
         return redirect('dashboard')
     
     team = get_object_or_404(Team, id=team_id)
     team.delete()
     messages.success(request, f"Team {team.name} deleted successfully.")
-    return redirect('manage_teams')
+    return redirect('dashboard')
+
 
 '''
 manage_departments view is used to manage the departments.
@@ -210,17 +287,30 @@ It renders the create_department.html template.
 '''
 @login_required
 def create_department(request):
-    if not request.user.userprofile.role == 'Department Leader':
+    if not request.user.userprofile.role == 'Department Leader' and not request.user.userprofile.role == 'Admin':
         messages.error(request, 'Access Denied.')
         return redirect('dashboard')
     
     if request.method == 'POST':
         name = request.POST.get('name')
-        department = Department.objects.create(name=name, leader=request.user)
+
+        department_leader = request.user
+        if request.user.userprofile.role == 'Admin':
+            department_leader = User.objects.get(id=request.POST.get('leader'))
+
+        
+        department = Department.objects.create(name=name, leader=department_leader)
         messages.success(request, f"Department {name} created successfully.")
-        return redirect('manage_departments')
+        return redirect('dashboard')
+        
     
-    return render(request, 'create_department.html')
+
+    users = User.objects.all()
+    if request.user.userprofile.role == 'Admin':
+        users = User.objects.filter(userprofile__role='Department Leader')
+
+    return render(request, 'create_department.html', {'users': users})
+
 
 '''
 edit_department view is used to edit a department.
@@ -228,7 +318,7 @@ It renders the edit_department.html template.
 '''
 @login_required
 def edit_department(request, department_id):
-    if not request.user.userprofile.role == 'Department Leader':
+    if not request.user.userprofile.role == 'Department Leader' and not request.user.userprofile.role == 'Admin':
         messages.error(request, 'Access Denied.')
         return redirect('dashboard')
     
@@ -241,9 +331,10 @@ def edit_department(request, department_id):
         department.teams.set(Team.objects.filter(id__in=selected_teams))
         department.save()
         messages.success(request, f"Department {department.name} updated successfully.")
-        return redirect('manage_departments')
+        return redirect('dashboard')
     
     return render(request, 'edit_department.html', {'department': department, 'teams': teams})
+
 
 '''
 delete_department view is used to delete a department.
@@ -251,14 +342,14 @@ It redirects the user to the manage_departments page.
 '''
 @login_required
 def delete_department(request, department_id):
-    if not request.user.userprofile.role == 'Department Leader':
+    if not request.user.userprofile.role == 'Department Leader' and not request.user.userprofile.role == 'Admin':
         messages.error(request, 'Access Denied.')
         return redirect('dashboard')
     
     department = get_object_or_404(Department, id=department_id)
     department.delete()
     messages.success(request, f"Department {department.name} deleted successfully.")
-    return redirect('manage_departments')
+    return redirect('dashboard')
 
 
 '''
@@ -283,6 +374,8 @@ def uservoting(request, session_id):
         return redirect('uservoting',  session_id=session.id)  # or wherever
 
     return render(request, 'uservoting.html', {'session': session, 'questions': questions})
+
+
 
 @login_required
 def create_health_check_session(request):
@@ -321,3 +414,56 @@ def add_question(request):
         form = QuestionForm()
 
     return render(request, 'add_question.html', {'form': form})
+
+
+
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# View 1 : Visualizing the Vote Analysis
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+@login_required ## ensuring that only the logged-in user can access this feature
+def vote_analysis_view(request):
+    ## querying the database to get the average vote grouped by team and session 
+    vote_data = (
+        Vote.objects
+        .values('team_name','session_name') ## group by team name and seession
+        .annotate(avg_vote=Avg('vote_value')) ## calculatng the average of the vote values
+    )
+
+    #Render the vote_analysis.html page and passing the vote data
+    return render(request,'vote_analysis.html',{'vote_data':vote_data})
+
+
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# View 2: Collating Votes/Progress for Team Manager
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+@login_required ## ensuring that only the logged-in user can access this feature
+def team_progress_view(request):
+    user = request.user # getting the current logged-in user details
+
+    # only allowing the team leaders to view this page
+    if user.userprofile.role != 'Team Leader':
+        return redirect('dashboard') ## redirecting unauthorized users
+    
+    ## filtering all teams that lead by th current user
+    teams = Team.objects.filter(leader=user)
+
+    ## checking if the user has selected a specific team via GET request
+    selected_team = request.GET.get('team')
+
+    ## filtering votes that are only for the selected leader's team
+    votes = Vote.objects.filter(team_in=teams)
+
+    ## if a team is selected further filter by the selected team
+    if selected_team:
+        votes=votes.filter(team_name=selected_team)
+
+    ## aggregating the votes by session and calculating average votes
+    session_summary = votes.values('session_name').annotate(avg_vote=Avg('vote_value'))
+
+    ## Rendering the team_porogress.html page with all required context
+    return render(request,'team_progress.html', {
+        'teams':teams,
+        'selected_team':selected_team,
+        'session_summary':session_summary,
+    })

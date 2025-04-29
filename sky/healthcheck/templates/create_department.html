@@ -5,12 +5,21 @@
 <form method="POST">
     {% csrf_token %}
     <div class="form-group">
+        {% if user.userprofile.role == 'Admin' %}
+            <label for="leader">Department Leader</label>
+            <select name="leader" id="leader" class="form-control">
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                {% endfor %}
+            </select>
+        {% endif %}
+        
         <label for="name">Department Name</label>
-        <input type="text" name="name" id="name" class="form-control" required>
+        <input type="text" name="name" id="name" maxlength="30" class="form-control" required>
     </div>
     <div class="mb-3 text-center">
         <button type="submit" class="btn btn-outline-success w-35">Create Department</button>
-        <a href="{% url 'manage_departments' %}" class="btn btn-outline-secondary w-25">Cancel</a>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary w-25">Cancel</a>
     </div>
 </form>
 {% endblock %}

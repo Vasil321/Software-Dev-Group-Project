@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}User Update{% endblock %}
+{% block content %}
+<h2>Update Update</h2>
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label">First Name</label>
+        {{ form.first_name }}
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Last Name</label>
+        {{ form.last_name }}
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        {{ form.email }}
+    </div>
+    {% if error %}
+        <div class="alert alert-danger">
+            <p>{{ error }}</p>
+        </div>
+    {% endif %}
+
+    <div class="form-group row">
+        <label class="form-label">{{ form.role.label }}</label>
+        {{ form.role }}
+        <small class="text-danger">{{ form.role.errors }}</small>
+    </div>
+    
+    <div class="mb-3 text-center">
+        <button type="submit" class="btn btn-outline-dark w-25">Update</button>
+    </div>
+</form>
+{% endblock %}
