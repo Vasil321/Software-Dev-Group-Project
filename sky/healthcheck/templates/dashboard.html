@@ -4,8 +4,6 @@
 <h2>Welcome, {{ user.first_name }} {{ user.last_name}} </h2>
 
 {% if user.userprofile.role == 'Admin' %}
-    {% comment %} <a href="{% url 'manage_users' %}" class="btn btn-danger">Manage Users</a>
-    <a href="{% url 'manage_questions' %}" class="btn btn-primary">Manage Questions</a> {% endcomment %}
 
     <hr>
     <h3>All Departments</h3>
@@ -113,10 +111,6 @@
             </tr>
         {% endfor %}
     </table>
-    <!-- <br/>
-    <div class="mb-3 text-end">
-        <a href="{% url 'create_team' %}" class="btn btn-outline-dark">New Team</a>
-    </div> -->
     <br/><br/>
 
 
@@ -164,7 +158,6 @@
                         <!-- {{ team.name }} (Team Leader: {{team.leader.first_name}} {{team.leader.last_name}}) <br/> -->
                     
                 </td>
-   
             </tr>
         {% endfor %}
     </table>
@@ -282,8 +275,6 @@
                                 </p>
                             </td>
                             <td style="text-align: end;">
-                                {% comment %}<a href="{% url 'view_statistic' session.id %}" class="btn btn-primary btn-sm">View Statistics</a> 
-                                <a href="" class="btn btn-outline-success btn-sm">View Statistics</a>{% endcomment %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -293,7 +284,7 @@
                 <div class="mb-3 text-end">
                     <a href="{% url 'create_session' %}" class="btn btn-outline-dark">Create Session</a>
                 </div>
-                          
+
             </div>
 
             <div class="col" style="border-left: 1px solid #ccc;background-color: #f9f9f9;">
@@ -314,7 +305,6 @@
     <br/>
 
 {% elif user.userprofile.role == 'Engineer' %}
-    {% comment %}<a href="{% url 'answer_questions' %}" class="btn btn-success btn-sm">Answer Questions</a> {% endcomment %}
     
     <hr>
     <h3 class="text-start">Sessions open for you</h3>
@@ -344,7 +334,6 @@
                 </td>
                 <td style="text-align: end;">
                     <a href="{% url 'uservoting' session.id %}" class="btn btn-outline-success btn-sm">Start Voting</a> 
-                    {% comment %}<a href="" class="btn btn-outline-success btn-sm">View Statistics</a>{% endcomment %}
                 </td>
             </tr>
         {% endfor %}

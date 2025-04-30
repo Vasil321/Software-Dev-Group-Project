@@ -6,10 +6,29 @@
 <div class="content-wrapper">
   <h2>Create Health Check Session</h2>
   <form method="post">
-    <a href="{% url 'add_question' %}" class="btn btn-info">Add Questions</a>
+    
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-dark">Create Session</button>
-  </form>
+    <a href="{% url 'add_question' %}" class="btn btn-outline-primary">Add Questions</a>
+    <hr/>
+    <div class="alert alert-secondary"><b>Default questions (asked in every session)</b><br/>
+    <hr/>
+        <small><b>Delivering Value</b> <br/>We deliver great stuff! Our stakeholders are happy.<br/>
+        <b>Team Health</b> <br/>Our team is resilient and supportive of each other.<br/>
+        <b>Code Quality</b> <br/>We’re proud of the code we write!<br/>
+        <b>Support</b> <br/>We get the support we need from outside the team.<br/>
+        <b>Speed</b> <br/>We deliver quickly and often.<br/>
+        <b>Fun</b> <br/>We genuinely enjoy working together!<br/>
+        <b>Mission</b> <br/>We know why we're here and how our work aligns.<br/>
+        <b>Learning</b> <br/>We are always learning and improving.<br/>
+        <b>Ownership</b> <br/> We feel ownership and autonomy over our work.<br/>
+        <b>Process</b> <br/>Our process helps us, not hinders us.
+    </small>
+    </div>
+    <hr/>
+    <p align="right">
+    <button type="submit" class="btn btn-outline-dark">Create Session</button>
+    </p>
+</form>
 </div>
 {% endblock %}

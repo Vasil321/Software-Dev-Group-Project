@@ -24,7 +24,7 @@
             <td>
                 {% for member in team.engineers.all %}
                     {{ member.username }}
-                    {% comment %} {% if not forloop.last %}, {% endif %} {% endcomment %}
+
                 {% endfor %}
             </td>
             <td align="right">
