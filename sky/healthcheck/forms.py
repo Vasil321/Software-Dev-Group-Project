@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.password_validation import validate_password
-from .models import UserProfile, Team, Department, Question, Response, HealthCheckSession
+from .models import UserProfile, Question, Response, HealthCheckSession
 
 '''
 UserRegistrationForm is used to register a new user.
@@ -37,6 +37,10 @@ UserSettingsForm is used to update the user's first name, last name and email.
 It extends the built-in ModelForm class.
 '''
 class UserSettingsForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=30, required=True, label="First Name")
+    last_name = forms.CharField(max_length=30, required=True, label="Last Name")
+    email = forms.EmailField(required=True, label="Email")
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email']
@@ -47,9 +51,20 @@ UserUpdateForm is used to update the user's first name, last name and email, onl
 It extends the built-in ModelForm class.
 '''
 class UserUpdateForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=30, required=True, label="First Name")
+    last_name = forms.CharField(max_length=30, required=True, label="Last Name")
+    email = forms.EmailField(required=True, label="Email")
+    role = forms.ChoiceField(choices=UserProfile.ROLE_CHOICES, required=True, label="Role")
+
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email']
+        fields = ['first_name', 'last_name', 'email', 'role']
+    
+    def __init__(self, *args, **kwargs):
+        role_initial = kwargs.pop('role_initial', None)
+        super(UserUpdateForm, self).__init__(*args, **kwargs)
+        if role_initial:
+            self.fields['role'].initial = role_initial
 
 
 '''

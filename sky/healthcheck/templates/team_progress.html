@@ -1,4 +1,4 @@
-{% extends 'main.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
 <h2>Team Progress Report</h2>
@@ -22,6 +22,6 @@
     {% endfor %}
     </ul>
 {% else %}
-    <p>No votes found for the selected team.</p>
+    <p align="center">No votes found for the selected team.</p>
 {% endif %}
 {% endblock %}

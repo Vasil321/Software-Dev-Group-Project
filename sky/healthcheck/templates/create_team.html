@@ -1,25 +1,34 @@
-{% extends 'base.html' %}
-{% block title %}Create Team{% endblock %}
-{% block content %}
-<h2>Create New Team</h2>
-<form method="POST">
-    {% csrf_token %}
-    <div class="form-group">
-        {% if user.userprofile.role == 'Admin' %}
-            <label for="leader">Team Leader</label>
-            <select name="leader" id="leader" class="form-control">
-                {% for user in users %}
-                    <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
-                {% endfor %}
-            </select>
-        {% endif %}
 
-        <label for="name">Team Name</label>
-        <input type="text" name="name" id="name" class="form-control" maxlength="30" required>
+{% extends 'base.html' %}
+{% block title %}Create Session{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  <h2>Create Health Check Session</h2>
+  <form method="post">
+    
+    {% csrf_token %}
+    {{ form.as_p }}
+    <a href="{% url 'add_question' %}" class="btn btn-outline-primary">Add Questions</a>
+    <hr/>
+    <div class="alert alert-secondary"><b>Default questions (asked in every session)</b><br/>
+    <hr/>
+        <small><b>Delivering Value</b> <br/>We deliver great stuff! Our stakeholders are happy.<br/>
+        <b>Team Health</b> <br/>Our team is resilient and supportive of each other.<br/>
+        <b>Code Quality</b> <br/>We’re proud of the code we write!<br/>
+        <b>Support</b> <br/>We get the support we need from outside the team.<br/>
+        <b>Speed</b> <br/>We deliver quickly and often.<br/>
+        <b>Fun</b> <br/>We genuinely enjoy working together!<br/>
+        <b>Mission</b> <br/>We know why we're here and how our work aligns.<br/>
+        <b>Learning</b> <br/>We are always learning and improving.<br/>
+        <b>Ownership</b> <br/> We feel ownership and autonomy over our work.<br/>
+        <b>Process</b> <br/>Our process helps us, not hinders us.
+    </small>
     </div>
-    <div class="mb-3 text-center">
-        <button type="submit" class="btn btn-outline-success w-35">Create Team</button>
-        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary w-25">Cancel</a>
-    </div>
+    <hr/>
+    <p align="right">
+    <button type="submit" class="btn btn-outline-dark">Create Session</button>
+    </p>
 </form>
+</div>
 {% endblock %}

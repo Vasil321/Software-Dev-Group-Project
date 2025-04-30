@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import UserProfile, Team, Department, Question, Response, HealthCheckSession
+from .models import UserProfile, Team, Department, Question, Response, HealthCheckSession, Vote
 from .forms import HealthCheckSessionForm, QuestionForm
 from django.http import HttpResponse
 from django.contrib.auth.models import User
@@ -9,6 +9,7 @@ from django.contrib.auth import login, logout, authenticate, update_session_auth
 from django.contrib.auth.decorators import login_required
 
 from django.db.models import Avg
+
 
 
 '''
@@ -360,6 +361,8 @@ def uservoting(request, session_id):
     questions = Question.objects.all()
     session = HealthCheckSession.objects.get(id=session_id)
     questions = session.questions.all().order_by('id')
+    for question in questions:
+        print(question.text)
     
 
     if request.method == 'POST':
@@ -425,7 +428,7 @@ def vote_analysis_view(request):
     ## querying the database to get the average vote grouped by team and session 
     vote_data = (
         Vote.objects
-        .values('team_name','session_name') ## group by team name and seession
+        .values('team','session') ## group by team name and seession
         .annotate(avg_vote=Avg('vote_value')) ## calculatng the average of the vote values
     )
 
@@ -452,14 +455,16 @@ def team_progress_view(request):
     selected_team = request.GET.get('team')
 
     ## filtering votes that are only for the selected leader's team
-    votes = Vote.objects.filter(team_in=teams)
+    #votes = Vote.objects.filter(team_in=teams)
+    votes = Vote.objects.filter(team__in=teams)
 
     ## if a team is selected further filter by the selected team
     if selected_team:
-        votes=votes.filter(team_name=selected_team)
+        selected_team_obj = Team.objects.filter(name=selected_team)
+        votes=votes.filter(team__in=selected_team_obj)
 
     ## aggregating the votes by session and calculating average votes
-    session_summary = votes.values('session_name').annotate(avg_vote=Avg('vote_value'))
+    session_summary = votes.values('session').annotate(avg_vote=Avg('vote_value'))
 
     ## Rendering the team_porogress.html page with all required context
     return render(request,'team_progress.html', {
