@@ -69,6 +69,11 @@ class Response(models.Model):
         ('yellow', 'Not That Good'),
         ('red', 'Very Bad'),
     ]
+    answer_choices = {
+        1:'green',
+        2:'yellow',
+        3:'red'
+    }
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
